@@ -17,7 +17,9 @@ public class Executor {
 	public static void main(String[] args) throws Exception,
 			IllegalAccessException, ClassNotFoundException {
 
-		// Il codice è il primo argomento
+		// Code to execute is the first argument
+		
+		// If this VM is started with suspend=y, the debugger stops HERE.
 		
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		System.setOut(new PrintStream(bos));
@@ -25,6 +27,7 @@ public class Executor {
 		System.setErr(new PrintStream(bosErr));
 
 		String code = args[0];
+		System.out.println("Going to execute code: "+code);
 		System.out.println(execCode(code));
 		console = bos.toString();
 		consoleErr = bosErr.toString();
@@ -33,11 +36,14 @@ public class Executor {
 
 	private static Object execCode(String code) throws Exception,
 			IllegalAccessException, ClassNotFoundException {
+
+		System.out.println("This is executor starting.");
+		
+		
 		String fullName = "Apple1Test";
 
 		String prefix = "public class Apple1Test implements net.thecodingegg.Executable{ public String execute() {";
 
-		System.out.println("This is executor");
 		String suffix = "return \"OK\";}}";
 
 		String classCode = prefix + code + suffix;
