@@ -39,7 +39,9 @@ public class Executor {
 
 		String fullName = "Apple1Test";
 
-		String prefix = "public class Apple1Test implements net.thecodingegg.Executable{ public String execute() {";
+		String prefix = "import net.thecodingegg.*; "
+				+ "public class Apple1Test implements net.thecodingegg.Executable { "
+				+ "public String execute() {";
 
 		String suffix = "return \"OK\";}}";
 

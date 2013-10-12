@@ -1,22 +1,26 @@
 package net.thecodingegg;
 
 import java.io.File;
-import java.lang.ProcessBuilder.Redirect;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.sun.jdi.AbsentInformationException;
+import com.sun.jdi.IncompatibleThreadStateException;
 import com.sun.jdi.LocalVariable;
 import com.sun.jdi.Method;
+import com.sun.jdi.ObjectReference;
+import com.sun.jdi.ReferenceType;
 import com.sun.jdi.StackFrame;
+import com.sun.jdi.StringReference;
 import com.sun.jdi.ThreadReference;
+import com.sun.jdi.Value;
 import com.sun.jdi.VirtualMachine;
 import com.sun.jdi.event.Event;
 import com.sun.jdi.event.EventQueue;
 import com.sun.jdi.event.EventSet;
 import com.sun.jdi.event.MethodEntryEvent;
 import com.sun.jdi.event.MethodExitEvent;
-import com.sun.jdi.event.ModificationWatchpointEvent;
 import com.sun.jdi.event.StepEvent;
 import com.sun.jdi.event.VMDeathEvent;
 import com.sun.jdi.event.VMDisconnectEvent;
@@ -33,7 +37,9 @@ public class Controller {
 		ProcessBuilder pb = new ProcessBuilder(
 				"java",
 				"-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=1045", // suspend=y
-				"net.thecodingegg.Executor", "int a = 3;System.out.println(a);");
+				"net.thecodingegg.Executor", "int a = 3;\nSystem.out.println(a);\nint b=5;\na = 6;\nApple apple1 = new Apple();\n"
+						+ "Apple apple2 = new Apple();\n"
+						+ "apple1 = apple2;\n");
 
 		// pb.environment is the set of environment variables: SET on command
 		// line
@@ -87,14 +93,20 @@ public class Controller {
 
 		EventRequestManager ev = vm.eventRequestManager();
 
+		// We need to trace three events:
+		// 1 - entering the Apple1Test.execute method --> enable step by step execution
+		
+		// 2 - exiting the Apple1Test.execute method --> disnable step by step execution
+		
+		// 3 - exiting the Executor main method --> get console and error log datas
+
+		// Between steps 1 and 2, step by step execution must get var information at each
+		// step
+		
+		// 1 - entering methods in the compiled class
 		MethodEntryRequest mReq = ev.createMethodEntryRequest();
 		mReq.addThreadFilter(mainThread);
 		mReq.addClassFilter("Apple1Test");
-		mReq.setEnabled(true);
-
-		mReq = ev.createMethodEntryRequest();
-		mReq.addThreadFilter(mainThread);
-		mReq.addClassFilter("net.thecodingegg.Executor");
 		mReq.setEnabled(true);
 
 		MethodExitRequest mexReq = ev.createMethodExitRequest();
@@ -108,138 +120,103 @@ public class Controller {
 		mexReq.setEnabled(true);
 
 		StepRequest sReq = ev.createStepRequest(mainThread,
-				StepRequest.STEP_LINE, StepRequest.STEP_OVER);
-		sReq.enable();
+				StepRequest.STEP_MIN, StepRequest.STEP_OVER);
+		sReq.addClassFilter("Apple1Test");
 
 		vm.resume(); // Let the vm proceed to the first breakpoint
+		String console = null;
+		String consoleErr = null;
 
+		int executeLevel = 0;
 		// process events
 		EventQueue eventQueue = vm.eventQueue();
-//		boolean doLog = false;
 		while (true) {
 			EventSet eventSet = eventQueue.remove();
 			for (Event event : eventSet) {
 				if (event instanceof StepEvent) {
-					List<StackFrame> frames = mainThread.frames();
-					// the current frame will be the first or the last. should
-					// be the last
-
-					StackFrame currentFrame = frames.get(0);
-					// Here look for vars
-					List<LocalVariable> localVariables = currentFrame
-							.visibleVariables();
-					for (LocalVariable l : localVariables) {
-						System.out.println(l);
-					}
+					StepEvent step = (StepEvent) event;
+					System.out.print(step.location()+":\t");
+					System.out.println(listVariables(mainThread));
 				} else if (event instanceof MethodEntryEvent) {
+					
 					MethodEntryEvent mEv = (MethodEntryEvent) event;
 					Method method = mEv.method();
+					// System.out.println("entering " + method.name());
 					if (method.name().equals("execute")) {
-//						doLog = true;
-					}
-//					if (doLog) 
-						System.out.println("entering " + method.name());
-
-					try {
-						List<StackFrame> frames = mainThread.frames();
-						// the current frame will be the first or the last.
-						// should
-						// be the last
-
-						StackFrame currentFrame = frames.get(0);
-						// Here look for vars
-						List<LocalVariable> localVariables = currentFrame
-								.visibleVariables();
-						for (LocalVariable l : localVariables) {
-							System.out.println(l);
-						}
-					} catch (Throwable exc) {
-						// System.out.println("No visible vars in "
-						// + method.name());
-						// No local variables available. skip
+						executeLevel++;
+						if (executeLevel == 2) sReq.enable();
 					}
 
 				} else if (event instanceof MethodExitEvent) {
 					MethodExitEvent mEv = (MethodExitEvent) event;
-
 					Method method = mEv.method();
-					if (method.name().equals("execute")) {
-//						doLog = false;
-					}
-
-					System.out.println("exiting: "
-							+ method.declaringType().name() + "."
-							+ method.name());
-
-					List<StackFrame> frames = mainThread.frames();
-					// the current frame will be the first or the last. should
-					// be the last
-
-					StackFrame currentFrame = frames.get(0);
-					// Here look for vars
-					try {
-						List<LocalVariable> localVariables = currentFrame
-								.visibleVariables();
-						for (LocalVariable l : localVariables) {
-							System.out.println("####" + l);
-							if (l.name().equals("instance")) {
-								System.out.println(currentFrame.getValue(l));
-							}
-						}
+					ReferenceType declaringType = method.declaringType();
+					
+					if (declaringType.name().equals("Apple1Test") &&method.name().equals("execute")) {
+						// TODO: disable step by step debugging
+						// but list variables first 
+						listVariables(mainThread);
+						executeLevel--;
+						if (executeLevel < 2) sReq.disable();
+					} else if (declaringType.name().equals("net.thecodingegg.Executor") && method.name().equals("main")) {
+						List<StackFrame> frames = mainThread.frames();
+						StackFrame currentFrame = frames.get(0);
 						
-						if (localVariables.isEmpty()) {
-							System.out.println("No visible vars in "
-							 + method.name());
-						}
-					} catch (AbsentInformationException exc) {
-						if (method.name().equals("execute")) {
-							exc.printStackTrace();
-						}
-						// No local variables available. skip
+						// Get console and error log:
+						console = getStringValue("console", currentFrame);
+						consoleErr = getStringValue("consoleErr", currentFrame);
 					}
+
+					/*System.out.println("exiting: "
+							+ method.declaringType().name() + "."
+							+ method.name()); */
 
 				} else if (event instanceof VMDeathEvent
 						|| event instanceof VMDisconnectEvent) {
-					// exit
+					System.out.println("Console: "+console);
+					System.out.println("Errors: "+consoleErr);
+					
 					return;
-					// } else if (event instanceof ClassPrepareEvent) {
-					// // watch field on loaded class
-					// ClassPrepareEvent classPrepEvent = (ClassPrepareEvent)
-					// event;
-					// ReferenceType refType = classPrepEvent
-					// .referenceType();
-					// addFieldWatch(vm, refType);
-				} else if (event instanceof ModificationWatchpointEvent) {
-					// a Test.foo has changed
-					ModificationWatchpointEvent modEvent = (ModificationWatchpointEvent) event;
-					System.out.println("old=" + modEvent.valueCurrent());
-					System.out.println("new=" + modEvent.valueToBe());
-					System.out.println();
 				}
 			}
 			eventSet.resume();
 		}
+	}
 
-		/*
-		 * // TODO: get the names of all declared variables (probably take a
-		 * look at frames) List<StackFrame> frames = mainThread.frames(); // the
-		 * current frame will be the first or the last. should be the last
-		 * 
-		 * StackFrame currentFrame = frames.get(frames.size()-1); // Here look
-		 * for vars List<LocalVariable> localVariables =
-		 * currentFrame.visibleVariables(); for (LocalVariable l:localVariables)
-		 * { System.out.println(l); }
-		 * 
-		 * 
-		 * 
-		 * 
-		 * 
-		 * 
-		 * 
-		 * p.waitFor(); p.destroy(); System.out.println("Finishing"); assert
-		 * pb.redirectInput() == Redirect.PIPE; assert
-		 * pb.redirectOutput().file() == log; assert p.getInputStream().read()
-		 * == -1;
-		 */
+	
+	private static String getStringValue(String s, StackFrame frame) throws AbsentInformationException {
+		LocalVariable var = frame.visibleVariableByName(s);
+		Value val = frame.getValue(var);
+		if (val instanceof StringReference) {
+			StringReference rVal = (StringReference) val;
+			return rVal.value();
+		}
+		return null;
+	}
+	
+	
+	private static Map<String, Object> listVariables(ThreadReference mainThread) throws IncompatibleThreadStateException, AbsentInformationException {
+
+		Map<String, Object> vars = new HashMap<>();
+
+		List<StackFrame> frames = mainThread.frames();
+		StackFrame currentFrame = frames.get(0);
+		// Here look for vars
+		List<LocalVariable> localVariables = currentFrame.visibleVariables();
+		for (LocalVariable l : localVariables) {
+			String var = l.name(); 
+			Value val = currentFrame.getValue(l);
+			vars.put(var, val);
+			if (val instanceof ObjectReference) {
+				ObjectReference objRef = (ObjectReference) val;
+				ReferenceType refType = (ReferenceType) objRef.type();
+				// System.out.println(refType.name());
+				long objId = objRef.uniqueID();
+				vars.put(var, refType.name() + "@"+objId);
+				
+				//System.out.println(var + " is an object");
+			} 
+		}
+		return vars;
 	}
 }
