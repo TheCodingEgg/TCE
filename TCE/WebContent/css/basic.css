@@ -1,0 +1,25 @@
+@CHARSET "ISO-8859-1";
+
+body{
+	
+	margin: 0px auto;
+	width: 500px;
+	background-color: orange;
+}
+
+p.large {
+	
+	font-size: 20px;
+}
+
+
+p#displayStuff {
+	
+	display: none;
+}
+
+graphicsMonitor {
+	margin-top: -170px; 
+	margin-left: 400px;
+	
+}
