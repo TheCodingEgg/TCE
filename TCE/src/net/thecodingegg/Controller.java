@@ -120,7 +120,7 @@ public class Controller {
 		mexReq.setEnabled(true);
 
 		StepRequest sReq = ev.createStepRequest(mainThread,
-				StepRequest.STEP_MIN, StepRequest.STEP_OVER);
+				StepRequest.STEP_LINE, StepRequest.STEP_OVER);
 		sReq.addClassFilter("Apple1Test");
 
 		vm.resume(); // Let the vm proceed to the first breakpoint
