@@ -18,13 +18,11 @@ $(document).ready(function() {
 	  drawResult(result);
 	});
 
-	//prototipo delle variabili
-	function VarReferences(id,value){
+	//prototipo delle variabili che puntano agli oggetti
+	function TCE_ObjectReference(id,value){
 		this.id = id;
 		this.value = value;
-	}
-	
-    VarReferences.prototype.drawVar = function(pos_var,paper){
+		this.drawVar = function(pos_var,paper){
     var rect = paper.rect(pos_var,30,100,70);
     rect.node.id = this.id;
     rect.attr("fill", "#f00");
@@ -33,15 +31,21 @@ $(document).ready(function() {
 						"fill" : "white",
 					    "font-size" : 20
 					});
-    
-}
+          };
+   }    
+    //TCE_Value x i tipi primitivi
+	function TCE_Value(id,value){
+		this.id = id;
+		this.value = value;
+		this.drawValue = function(pos_var,paper){
+			//disegna la variabile valore->"ancora da definire"
+		};
+	}
     //prototipo degli oggetti
-    function ObjectReferences(type,id){
+    function TCE_Object(type,id){
     	this.type = type;
     	this.id = id;
-    }
-    
-    ObjectReferences.prototype.drawApple = function (paper,x,y,scal,rot){
+    	this.draw = function (paper,x,y,scal,rot){
     	//path della mela  
 		var mela_back = paper.path("M415.833,134.334c0,0,70.001,59.167,16.668,211.667c0,0-34.165,108.667-123.332,133.333c0,0-18.334,9.166-44.167-4.167c0,0-15.833-14.166-56.667-0.833c0,0-22.5,8.332-50.833-13.334c0,0-125.833-102.5-136.667-215.833c0,0-14.167-92.499,85-128.33c0,0,60.833-19.167,109.167,15.833c0,0-14.999-57.499-38.333-90.832c0,0,25.833-21.667,38.333-1.667c0,0,15.834,20.833,30.833,94.167c0,0,3.333-2.5,25-11.667c0,0,80.833-77.5,204.166-61.666C475.001,61.003,467.498,100.998,415.833,134.334z");
 	    var foglia = paper.path("M247,157c0,0,73.333-96,218.667-90c0,0-18,54-85.333,77.334c0,0-58.666,26-132.667,20L247,157z");
@@ -52,36 +56,38 @@ $(document).ready(function() {
 	 	foglia.attr("fill","#006600");
 	 	gambo.attr("fill","#660000");
 	 	mela_front.attr("fill","#990000");
-	 	mela_back.node.id = this.id;
-        
+	 	
 	 	 var st = paper.set();
 	 	    st.push(mela_back,foglia,gambo,mela_front);
-	 	    st.transform(scal+" "+pos_apple+","+y);
-		 
-	 	    return mela_back;
+	 	    //st.transform(scal+" "+x+","+y+" "+rot);
+	 	    //N.B. da sistemare deve funzionare con i parametri passati ala funzione 
+	 	    st.transform(" s0.25,0.25,"+x+","+"360","0");
+	 	   mela_back.node.id = this.id;
+	         
+        };
     }
      
      function drawResult(result){
     	 
     	 var paper= Raphael("canvas", 500, 500);
- 		 //ciclo per le variabili 
+ 		 //ciclo per le tce_objectReference 
     	 var pos_var= 20;
      for(var i = 0; i < result.vars.length;i++) {
-              var varReferences = new VarReferences(result.vars[i].id,result.vars[i].value);
-              varReferences.drawVar(pos_var,paper);
+              var objectReference = new TCE_ObjectReference(result.vars[i].id,result.vars[i].value);
+              objectReference.drawVar(pos_var,paper);
                             var pos_var = pos_var+160;
                         	 
                         	   
 		   }
      
      
-     //ciclo per le mele
+     //ciclo per le tce_object
      var pos_apple= 20;
 	  for(var i = 0; i < result.objects.length;i++) {
 		  	 if(result.objects[i].type =='Apple'){
 		  		 
-		  		var objectReferences = new ObjectReferences(result.objects[i].type,result.objects[i].id);  
-		  		objectReferences.drawApple(paper,pos_apple,"360"," s0.25,0.25,","0");
+		  		var tce_Object = new TCE_Object(result.objects[i].type,result.objects[i].id);  
+		  		tce_Object.draw(paper,pos_apple,"360"," s0.25,0.25,","0");
 		        var pos_apple = pos_apple+160;
 		  	 }
 		   }
