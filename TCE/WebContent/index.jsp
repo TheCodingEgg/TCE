@@ -8,7 +8,9 @@
 <script src="js/jquery-1.10.2.js"></script>
 <script src="js/svg.js"></script>
 <script src="js/raphael.js"></script>
-<script src="js/basic.js"></script>
+<script src="js/prototypes.js"></script>
+
+
 <script src="js/codemirror-3.18/lib/codemirror.js"></script>
 <script src="js/codemirror-3.18/mode/clike/clike.js"></script>
 	
@@ -27,7 +29,7 @@
 		
 		<textarea type="text" id="userIn" name="userIn" rows="15"  cols="51"></textarea>
 		
-		<input type="submit" />
+		<input type="button" id="invio" value="invio"/>
 	</form>
 	<p id="displayStuff"/>
 	<hr/>
