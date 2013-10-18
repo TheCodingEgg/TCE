@@ -79,8 +79,7 @@ $(document).ready(function() {
 			  var value_svg = result.vars[i].value; // SVG della mela
 				
 			  alert(value_svg);
-			 // var test = $(var_svg).offset().left;
-			 // var test2 = $(var_svg).offset().top;
+			 
 			 // alert(JSON.stringify($(var_svg).offset().top));
 			 // alert(JSON.stringify($(var_svg).offset().left));
 		      
@@ -96,14 +95,6 @@ $(document).ready(function() {
 			   
 			   var apple_test = $(value_svg);
 			  
-			   //var top_apple  = apple_test.offsetTop;
-			  // var top_apple = value_svg;
-			  /*
-			   var left_apple = apple_test.position().left;
-			   var apple_y = top_apple - top_canvas;
-			   var apple_x = top_apple - left_canvas;
-			  */
-			   
 			    var linea = paper.path("M "+var_x+" "+var_y+" L 200 , 200");
 			    //linea.animate({path:"M "+var_x+" "+var_y+" L 200,200"},3000);
 			    // disegnare il filo che collega var_svg e value_svg
