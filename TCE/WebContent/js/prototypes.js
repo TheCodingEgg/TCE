@@ -138,8 +138,8 @@ $(document).ready(function() {
   		   var var_svg = $(var_svg);
   		   var top_var  = var_svg.position().top;
   		   var left_var = var_svg.position().left;
-  		   var var_y = top_var - top_canvas;
-		   var var_x = left_var - left_canvas;
+  		   var var_y = top_var;
+		   var var_x = left_var;
   		  /*
            
     	   var top_obj = value_svg.offset().top;
@@ -148,8 +148,8 @@ $(document).ready(function() {
   		   var obj_y = left_obj - left_canvas;*/
 		   
 		   var value_svg = $(value_svg);
-		   var obj_x = $(value_svg)[0].getBBox().x;
-  		   var obj_y = $(value_svg)[0].getBBox().y;
+		   var obj_x = $(value_svg).position().left;
+  		   var obj_y = $(value_svg).position().top;
   		   
 		  
   		   var linea = paper.path("M "+var_x+" "+var_y+" L "+obj_x+" , "+obj_y); 
