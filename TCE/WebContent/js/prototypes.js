@@ -131,15 +131,15 @@ $(document).ready(function() {
 		  var value_svg = result.vars[i].value; // SVG della mela
 			// alert(JSON.stringify($(var_svg).offset().left));
 	      //top della mela-top canvas, left della mela-left del canvas
-		   var canvas = $("#canvas");
-		   var top_canvas = canvas.position().top;
-  		   var left_canvas = canvas.position().left;
+		  var canvas = $("#canvas");
+		  var top_canvas = canvas.position().top;
+  		  var left_canvas = canvas.position().left;
   		   
-  		   var var_svg = $(var_svg);
-  		   var top_var  = var_svg.position().top;
-  		   var left_var = var_svg.position().left;
-  		   var var_y = top_var - top_canvas;
-		   var var_x = left_var - left_canvas;
+  		  var var_svg = $(var_svg);
+  		  var top_var  = var_svg.position().top;
+  		  var left_var = var_svg.position().left;
+  		  var var_y = top_var - top_canvas;
+		  var var_x = left_var - left_canvas;
   		  /*
            
     	   var top_obj = value_svg.offset().top;
@@ -147,18 +147,18 @@ $(document).ready(function() {
   		   var obj_x = top_obj - top_canvas;
   		   var obj_y = left_obj - left_canvas;*/
 		   
-		   var value_svg = $(value_svg);
-		   var obj_x = $(value_svg)[0].getBBox().x;
-  		   var obj_y = $(value_svg)[0].getBBox().y;
+		  var value_svg = $(value_svg);
+		  var obj_x = $(value_svg)[0].getBBox().x;
+  		  var obj_y = $(value_svg)[0].getBBox().y;
   		   
 		  
-  		   var linea = paper.path("M "+var_x+" "+var_y+" L "+obj_x+" , "+obj_y); 
+  		  var linea = paper.path("M "+var_x+" "+var_y+" L "+obj_x+" , "+obj_y); 
 		   
 		   //var tce_path = new TCE_path();
 		   //tce_path.drawPath(canvas,paper,var_svg,value_svg);
 		   //var linea = paper.path("M "+var_x+" "+var_y+" L 200 , 200");
 		   //var linea = paper.path("M "+var_x+" "+var_y+" L "+obj_x+" , "+obj_y+"");
-		    //linea.animate({path:"M "+var_x+" "+var_y+" L 200,200"},3000);
+		   //linea.animate({path:"M "+var_x+" "+var_y+" L 200,200"},3000);
 		 
 		}
      

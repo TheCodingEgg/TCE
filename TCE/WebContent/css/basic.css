@@ -23,3 +23,7 @@ graphicsMonitor {
 	margin-left: 400px;
 	
 }
+
+canvas {
+	position: relative;
+}
