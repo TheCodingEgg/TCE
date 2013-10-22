@@ -1,47 +1,50 @@
 $(document).ready(function() {
 	
-	$('#invio').click(function() {
-				//definire i tre prototipi di oggetto, variabile e tipo_primitivo	
-					
-					var result = {
-						    vars: [ 
-						        {id:'m1', value:'#apple_1'}, 
-						        {id:'m2', value:'#apple_1'},
-						        {id:'m3', value:'#apple_2'}
-						    ],
-						    objects:[  
-						        {type:'Apple', id:'apple_1'},
-						        {type:'Apple', id:'apple_2'},
-						        {type:'Apple', id:'apple_3'}
-						    ]
-						}
-	  drawResult(result);
+	var state = 0;
+	$('#run').click(function() {
+			
+		drawResult(result,state);
+		  state++;
+	  
+	  
 	});
+    //TCE_Value x i tipi primitivi
+	function TCE_Value(name,value){
+		this.name = name;
+		this.value = value;
+		this.drawValue = function(pos_varPri,paper){
+			
+			var circle = paper.circle(pos_varPri+30, 40, 40);
+			// Sets the fill attribute of the circle to red (#f00)
+			circle.attr("fill", "#f00");
+
+			// Sets the stroke attribute of the circle to white
+			circle.attr("stroke", "#fff");
+			 //testo dentro alla variabile
+			   paper.text(pos_varPri+30, 40, ""+this.name+" = "+this.value).attr({
+								"fill" : "white",
+							    "font-size" : 20
+							});
+		};
+	}
 
 	//prototipo delle variabili che puntano agli oggetti
-	function TCE_ObjectReference(id,value){
-		this.id = id;
+	function TCE_ObjectReference(name,value){
+		this.name = name;
 		this.value = value;
 		this.drawVar = function(pos_var,paper){
-    var rect = paper.rect(pos_var,30,100,70);
-    rect.node.id = this.id;
+    var rect = paper.rect(pos_var,100,100,70);
+    rect.node.id = this.name;
     rect.attr("fill", "#f00");
     //testo dentro alla variabile
-	   paper.text(pos_var+50, 50, ""+this.id).attr({
+	   paper.text(pos_var+50, 130, ""+this.name).attr({
 						"fill" : "white",
 					    "font-size" : 20
 					});
-        return rect;  
+        
 		};
    }    
-    //TCE_Value x i tipi primitivi
-	function TCE_Value(id,value){
-		this.id = id;
-		this.value = value;
-		this.drawValue = function(pos_var,paper){
-			//disegna la variabile valore->"ancora da definire"
-		};
-	}
+
     //prototipo degli oggetti
     function TCE_Object(type,id){
     	this.type = type;
@@ -61,7 +64,7 @@ $(document).ready(function() {
 	 	 var st = paper.set();
 	 	    st.push(mela_back,foglia,gambo,mela_front);
 	 	    //st.transform(scal+" "+x+","+y+" "+rot);
-	 	    //N.B. da sistemare deve funzionare con i parametri passati ala funzione 
+	 	    //N.B. da sistemare deve funzionare con i parametri passati alla funzione 
 	 	    st.transform(" s0.25,0.25,"+x+","+"360","0");
 	 	   mela_back.node.id = this.id;
 	 	 
@@ -71,97 +74,98 @@ $(document).ready(function() {
      function TCE_path(){
     	
     	 
-    	 this.drawPath = function (canvas,paper,var_svg,value_svg){
+    	 this.drawPath = function (canvas,paper){
     		
-    	   var top_canvas = canvas.offset().top;
-  		   var left_canvas = canvas.offset().left;
-  		   
-  		   var var_svg = $(var_svg);
-  		   var top_var  = var_svg.offset().top;
-  		   var left_var = var_svg.offset().left;
-  		   var var_y = top_var - top_canvas;
-		   var var_x = left_var - left_canvas;
-  		  /*
-           var value_svg = $(value_svg);
-    	   var top_obj = value_svg.offset().top;
-  		   var left_obj = value_svg.offset().left;
-  		   var obj_x = top_obj - top_canvas;
-  		   var obj_y = left_obj - left_canvas;*/
-  		 alert($(value_svg)[0].getBBox().x);
-  		   
-  		   var obj_x = $(value_svg)[0].getBBox().x;
-  		   var obj_y = $(value_svg)[0].getBBox().y;
   		 
   		   var linea = paper.path("M "+var_x+" "+var_y+" L "+obj_x+" , "+obj_y);
     		 
     	 };
      }
      
-     function drawResult(result){
+     function drawResult(result,state){
     	 
-    	 var paper= Raphael("canvas", 500, 500);
- 		 //ciclo per le tce_objectReference 
-    	 var pos_var= 20;
-     for(var i = 0; i < result.vars.length;i++) {
-             var objectReference = new TCE_ObjectReference(result.vars[i].id,result.vars[i].value);
+    	 var paper= Raphael("canvas", 800, 800);
+    	 var state = result[state];		 
+    	 var pos_varPri= 20;
+    	 
+    	 //ciclo per le tce_Value
+    	 for(var i = 0; i < state.varsPrimitive.length;i++) {
+        	 
+             var varsPrimitive = new TCE_Value(state.varsPrimitive[i].name,state.varsPrimitive[i].value);
+                 varsPrimitive.drawValue(pos_varPri,paper);
+                            var pos_varPri = pos_varPri+100;
+    	     }
+    	 
+    	
+    	 var pos_var = 20;
+   //ciclo per le tce_objectReference 
+     for(var i = 0; i < state.vars.length;i++) {
+    	 
+             var objectReference = new TCE_ObjectReference(state.vars[i].name,state.vars[i].value);
                  objectReference.drawVar(pos_var,paper);
                             var pos_var = pos_var+160;
-                        	 
+    	     }          	 
                         	   
-		   }
+		   
+     
      
      
      //ciclo per le tce_object
      var pos_apple= 20;
-	  for(var i = 0; i < result.objects.length;i++) {
-		  	 if(result.objects[i].type =='Apple'){
+	  for(var i = 0; i < state.objects.length;i++) {
+		  
+		  	 if(state.objects[i].type =='net.thecodingegg.Apple'){
 		  		 
-		  		var tce_Object = new TCE_Object(result.objects[i].type,result.objects[i].id);  
+		  		var tce_Object = new TCE_Object(state.objects[i].type,state.objects[i].id);  
 		  		    tce_Object.draw(paper,pos_apple,"360"," s0.25,0.25,","0");
 		        var pos_apple = pos_apple+160;
 		        
-		        
+		  	 }
 				
 		  	 }
-		   }
-    
-	    //terzo ciclo per le linee
-	  for(var i = 0; i < result.vars.length;i++) {
-		  var  var_svg = "#"+result.vars[i].id; // SVG del rettangolo della variabile
-		  var value_svg = result.vars[i].value; // SVG della mela
-			// alert(JSON.stringify($(var_svg).offset().left));
-	      //top della mela-top canvas, left della mela-left del canvas
-		  var canvas = $("#canvas");
-		  var top_canvas = canvas.position().top;
-  		  var left_canvas = canvas.position().left;
-  		   
-  		  var var_svg = $(var_svg);
-  		  var top_var  = var_svg.position().top;
-  		  var left_var = var_svg.position().left;
-  		  var var_y = top_var - top_canvas;
-		  var var_x = left_var - left_canvas;
-  		  /*
-           
-    	   var top_obj = value_svg.offset().top;
-  		   var left_obj = value_svg.offset().left;
-  		   var obj_x = top_obj - top_canvas;
-  		   var obj_y = left_obj - left_canvas;*/
 		   
-		  var value_svg = $(value_svg);
-		  var obj_x = $(value_svg)[0].getBBox().x;
-  		  var obj_y = $(value_svg)[0].getBBox().y;
+   
+	    //terzo ciclo per le linee
+	  for(var i = 0; i < state.vars.length;i++) {
+		 
+		  var  var_svg = "#"+state.vars[i].name; // SVG del rettangolo della variabile
+		  var value_svg = state.vars[i].value; // SVG della mela
+			// alert(JSON.stringify($(var_svg).offset().left));
+	      
+		  var canvas = $("#canvas");
+		  
+		  var top_canvas = canvas.position().top;
+ 		  var left_canvas = canvas.position().left;
+ 		   
+
+ 		  var var_svg = $(var_svg);
+ 		  var top_var  = var_svg.position().top;
+ 		  var left_var = var_svg.position().left;
+ 		  var var_y = top_var - top_canvas;
+		  var var_x = left_var - left_canvas;
+
+ 		   var var_svg = $(var_svg);
+ 		   var top_var  = var_svg.position().top;
+ 		   var left_var = var_svg.position().left;
+ 		   var var_y = top_var;
+		   var var_x = left_var;
+
+		   var value_svg = $(value_svg);
+		   var obj_x = $(value_svg).position().left;
+ 		   var obj_y = $(value_svg).position().top;
+	  
   		   
 		  
   		  var linea = paper.path("M "+var_x+" "+var_y+" L "+obj_x+" , "+obj_y); 
 		   
-		   //var tce_path = new TCE_path();
-		   //tce_path.drawPath(canvas,paper,var_svg,value_svg);
+		  // var tce_path = new TCE_path();
+		  // tce_path.drawPath(canvas,paper);
 		   //var linea = paper.path("M "+var_x+" "+var_y+" L 200 , 200");
 		   //var linea = paper.path("M "+var_x+" "+var_y+" L "+obj_x+" , "+obj_y+"");
 		   //linea.animate({path:"M "+var_x+" "+var_y+" L 200,200"},3000);
-		 
+		  }
 		}
      
      
-     }
+     
 });
