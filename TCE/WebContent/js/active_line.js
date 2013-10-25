@@ -30,6 +30,7 @@ $(document).ready(function() {
 	  }
 
 	  function updateActiveLine(cm) {
+		  //doverebbe dare un numero--->>>
 	    var line = cm.getLineHandleVisualStart(cm.getCursor().line);
 	    if (cm.state.activeLine == line) return;
 	    clearActiveLine(cm);

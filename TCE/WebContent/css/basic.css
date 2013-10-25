@@ -27,3 +27,6 @@ graphicsMonitor {
 canvas {
 	position: relative;
 }
+.test{
+	background-color: black;
+}

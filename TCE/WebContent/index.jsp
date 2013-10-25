@@ -7,7 +7,9 @@
 <title>Prototype</title>
 <script src="js/jquery-1.10.2.js"></script>
 <script src="js/raphael.js"></script>
+<script src="js/sampleResult.js"></script>
 <script src="js/prototypes.js"></script>
+
 
 
 <script src="js/codemirror-3.18/lib/codemirror.js"></script>
@@ -54,7 +56,18 @@
 $(document).ready(function() {
 	
 	$("#run").click(function(){
-    	alert(CodeMirror.getLine(1));
+	      
+	    //lineCount restituisce il numero totale di righe
+    	//alert(javaEditor.lineCount());
+    	for(i = 0; i < javaEditor.lineCount(); i++){
+    	 //addLineClass dovrebbe dare uno stile css alla linea 
+    	  //alert(javaEditor.addLineClass());
+    	 alert(javaEditor.getLine(i));
+    	// cm.setMarker (n, "<span style=\"color: #900\"> ► </ span>% N%");
+        // cm.markText ({line: 12, ch: 0}, {line: 12, ch: 50}, "AAPS");
+        var BACK_CLASS = "CodeMirror-activeline-background";
+    	 javaEditor.addLineClass(i, "background", BACK_CLASS);
+    	}
     });
 		
 	
